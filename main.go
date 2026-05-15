@@ -58,11 +58,7 @@ func main() {
 
 				guilds := s.State.Guilds
 				for _, guild := range guilds {
-					channels, err := s.GuildChannels(guild.ID)
-					if err != nil {
-						log.Printf("ギルド %s のチャンネル一覧取得に失敗: %v", guild.ID, err)
-						continue
-					}
+					channels := guild.Channels
 
 					for _, channel := range channels {
 						var newName string
