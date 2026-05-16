@@ -18,7 +18,13 @@ var nowDayFormat = "2006年01月02日"
 var nowTimeFormat = "15時04分05秒"
 
 var (
-	session *discordgo.Session
+	session  *discordgo.Session
+	commands = []*discordgo.ApplicationCommand{
+		{
+			Name:        "help",
+			Description: "Botの使い方を知ります",
+		},
+	}
 )
 
 func main() {
@@ -39,6 +45,11 @@ func main() {
 
 	session.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Print("起動しました。")
+
+		go func() {
+			s.ApplicationCommandBulkOverwrite(s.State.Application.ID, "", commands)
+			log.Print("スラッシュコマンドを同期しました。")
+		}()
 
 		go func() {
 			for {
@@ -84,6 +95,44 @@ func main() {
 				time.Sleep(30 * time.Minute)
 			}
 		}()
+	})
+
+	session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		if i.Type != discordgo.InteractionApplicationCommand {
+			return
+		}
+
+		if i.ApplicationCommandData().Name == "help" {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title: "時計Botの使い方",
+							Color: 16769280,
+							Fields: []*discordgo.MessageEmbedField{
+								{
+									Name:   "基本的な時計",
+									Value:  "時計Botのステータスに現在時刻が表示されています",
+									Inline: false,
+								},
+								{
+									Name:   "チャンネル表示時計",
+									Value:  "特定のチャンネルのチャンネル名が現在時刻に編集されます。\n以下の文字列をチャンネルトピックに含ませると編集されるようになります。\n・時刻 (`time-ch`)\n・日付 (`day-ch`)\n・日付と時刻 (`clock-ch`)",
+									Inline: false,
+								},
+								{
+									Name:   "編集の周期",
+									Value:  "編集の周期は以下になっています。\n・ステータス (10秒に一回)\n・チャンネル (30分に一回)",
+									Inline: false,
+								},
+							},
+						},
+					},
+					Flags: discordgo.MessageFlagsEphemeral,
+				},
+			})
+		}
 	})
 
 	if err := session.Open(); err != nil {
