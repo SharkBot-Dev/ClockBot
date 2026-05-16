@@ -13,9 +13,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var nowDataFormat = "2006年01月02日 15時04分05秒"
+var nowDataFormat = "2006年01月02日 15時04分"
 var nowDayFormat = "2006年01月02日"
-var nowTimeFormat = "15時04分05秒"
+var nowTimeFormat = "15時04分"
 
 var (
 	session  *discordgo.Session
