@@ -102,7 +102,9 @@ func main() {
 			return
 		}
 
-		if i.ApplicationCommandData().Name == "help" {
+		commandName := i.ApplicationCommandData().Name
+		switch commandName {
+		case "help":
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
