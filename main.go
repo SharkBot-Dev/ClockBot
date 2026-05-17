@@ -97,6 +97,26 @@ func main() {
 							usedTypes = append(usedTypes, "clock-ch")
 						}
 
+						if strings.HasSuffix(channel.Name, "#time-ch") {
+							if slices.Contains(usedTypes, "time-ch") {
+								continue
+							}
+							newName = nowtime + "#time-ch"
+							usedTypes = append(usedTypes, "time-ch")
+						} else if strings.HasSuffix(channel.Name, "#day-ch") {
+							if slices.Contains(usedTypes, "day-ch") {
+								continue
+							}
+							newName = nowday + "#day-ch"
+							usedTypes = append(usedTypes, "day-ch")
+						} else if strings.HasSuffix(channel.Name, "#clock-ch") {
+							if slices.Contains(usedTypes, "clock-ch") {
+								continue
+							}
+							newName = nowclock + "#clock-ch"
+							usedTypes = append(usedTypes, "clock-ch")
+						}
+
 						if newName != "" && channel.Name != newName {
 							_, err := s.ChannelEdit(channel.ID, &discordgo.ChannelEdit{Name: newName})
 							if err != nil {
@@ -110,6 +130,70 @@ func main() {
 				time.Sleep(30 * time.Minute)
 			}
 		}()
+	})
+
+	session.AddHandler(func(s *discordgo.Session, channel *discordgo.ChannelUpdate) {
+		nowtime := time.Now().Format(nowTimeFormat)
+		nowday := time.Now().Format(nowDayFormat)
+		nowclock := time.Now().Format(nowDataFormat)
+
+		var newName string
+
+		if strings.Contains(channel.Topic, "time-ch") {
+			newName = nowtime
+		} else if strings.Contains(channel.Topic, "day-ch") {
+			newName = nowday
+		} else if strings.Contains(channel.Topic, "clock-ch") {
+			newName = nowclock
+		}
+
+		if strings.HasSuffix(channel.Name, "#time-ch") {
+			newName = nowtime + "#time-ch"
+		} else if strings.HasSuffix(channel.Name, "#day-ch") {
+			newName = nowday + "#day-ch"
+		} else if strings.HasSuffix(channel.Name, "#clock-ch") {
+			newName = nowclock + "#clock-ch"
+		}
+
+		if newName != "" && channel.Name != newName {
+			_, err := s.ChannelEdit(channel.ID, &discordgo.ChannelEdit{Name: newName})
+			if err != nil {
+				log.Printf("チャンネル %s (%s) の編集に失敗: %v", channel.Name, channel.ID, err)
+			}
+			time.Sleep(1 * time.Second)
+		}
+	})
+
+	session.AddHandler(func(s *discordgo.Session, channel *discordgo.ChannelCreate) {
+		nowtime := time.Now().Format(nowTimeFormat)
+		nowday := time.Now().Format(nowDayFormat)
+		nowclock := time.Now().Format(nowDataFormat)
+
+		var newName string
+
+		if strings.Contains(channel.Topic, "time-ch") {
+			newName = nowtime
+		} else if strings.Contains(channel.Topic, "day-ch") {
+			newName = nowday
+		} else if strings.Contains(channel.Topic, "clock-ch") {
+			newName = nowclock
+		}
+
+		if strings.HasSuffix(channel.Name, "#time-ch") {
+			newName = nowtime + "#time-ch"
+		} else if strings.HasSuffix(channel.Name, "#day-ch") {
+			newName = nowday + "#day-ch"
+		} else if strings.HasSuffix(channel.Name, "#clock-ch") {
+			newName = nowclock + "#clock-ch"
+		}
+
+		if newName != "" && channel.Name != newName {
+			_, err := s.ChannelEdit(channel.ID, &discordgo.ChannelEdit{Name: newName})
+			if err != nil {
+				log.Printf("チャンネル %s (%s) の編集に失敗: %v", channel.Name, channel.ID, err)
+			}
+			time.Sleep(1 * time.Second)
+		}
 	})
 
 	session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -134,8 +218,13 @@ func main() {
 									Inline: false,
 								},
 								{
-									Name:   "チャンネル表示時計",
+									Name:   "チャンネル表示時計 (1)",
 									Value:  "特定のチャンネルのチャンネル名が現在時刻に編集されます。\n以下の文字列をチャンネルトピックに含ませると編集されるようになります。\n・時刻 (`time-ch`)\n・日付 (`day-ch`)\n・日付と時刻 (`clock-ch`)",
+									Inline: false,
+								},
+								{
+									Name:   "チャンネル表示時計 (2)",
+									Value:  "特定のチャンネルもチャンネル名が現在時刻に編集されます。\n以下の文字列をチャンネル名の最後に置くと編集されるようになります。\n・時刻 (`#time-ch`)\n・日付 (`#day-ch`)\n・日付と時刻 (`#clock-ch`)",
 									Inline: false,
 								},
 								{
