@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -71,15 +72,29 @@ func main() {
 				for _, guild := range guilds {
 					channels := guild.Channels
 
+					var usedTypes []string
+
 					for _, channel := range channels {
 						var newName string
 
 						if strings.Contains(channel.Topic, "time-ch") {
+							if slices.Contains(usedTypes, "time-ch") {
+								continue
+							}
 							newName = nowtime
+							usedTypes = append(usedTypes, "time-ch")
 						} else if strings.Contains(channel.Topic, "day-ch") {
+							if slices.Contains(usedTypes, "day-ch") {
+								continue
+							}
 							newName = nowday
+							usedTypes = append(usedTypes, "day-ch")
 						} else if strings.Contains(channel.Topic, "clock-ch") {
+							if slices.Contains(usedTypes, "clock-ch") {
+								continue
+							}
 							newName = nowclock
+							usedTypes = append(usedTypes, "clock-ch")
 						}
 
 						if newName != "" && channel.Name != newName {
