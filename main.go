@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"slices"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -25,7 +27,12 @@ var (
 			Name:        "help",
 			Description: "Botの使い方を知ります",
 		},
+		{
+			Name:        "about",
+			Description: "Botの情報を取得します",
+		},
 	}
+	startTime time.Time
 )
 
 func main() {
@@ -238,12 +245,63 @@ func main() {
 					Flags: discordgo.MessageFlagsEphemeral,
 				},
 			})
+		case "about":
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title: "時計Botの情報",
+							Color: 16769280,
+							Fields: []*discordgo.MessageEmbedField{
+								{
+									Name:   "サーバー数",
+									Value:  strconv.Itoa(len(s.State.Guilds)) + "サーバー",
+									Inline: false,
+								},
+								{
+									Name:   "起動時間",
+									Value:  strconv.Itoa(len(s.State.Guilds)) + "サーバー",
+									Inline: false,
+								},
+							},
+						},
+					},
+					Flags: discordgo.MessageFlagsEphemeral,
+				},
+			})
+
+			uptime := time.Since(startTime)
+			uptimeStr := fmt.Sprintf("%d時間%d分", int(uptime.Hours()), int(uptime.Minutes())%60)
+			s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+				Embeds: &[]*discordgo.MessageEmbed{
+					{
+						Title: "時計Botの情報",
+						Color: 16769280,
+						Fields: []*discordgo.MessageEmbedField{
+							{
+								Name:   "サーバー数",
+								Value:  strconv.Itoa(len(s.State.Guilds)) + " サーバー",
+								Inline: false,
+							},
+							{
+								Name:   "起動時間",
+								Value:  uptimeStr,
+								Inline: false,
+							},
+						},
+					},
+				},
+			})
 		}
 	})
 
 	if err := session.Open(); err != nil {
 		log.Fatalf("Discordセッションのオープンに失敗: %v", err)
 	}
+
+	startTime = time.Now()
+
 	defer session.Close()
 
 	log.Println("ボットが起動しました。Ctrl+Cで終了します。")
